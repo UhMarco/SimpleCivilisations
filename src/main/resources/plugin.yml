@@ -1,0 +1,4 @@
+name: SimpleCivilisations
+version: '${version}'
+main: com.marco.simplecivilisations.SimpleCivilisations
+api-version: 1.20
