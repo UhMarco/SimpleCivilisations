@@ -319,30 +319,6 @@ public class MySQL {
         return null;
     }
 
-    public boolean hasInvite(User user, Civilisation civilisation) {
-        try {
-            PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) AS count FROM invites WHERE civilisation=? AND user=?");
-            ps.setString(1, civilisation.getUniqueId().toString());
-            ps.setString(2, user.getUniqueId().toString());
-            ResultSet result = ps.executeQuery();
-            if (result.next() && result.getInt("count") != 0) return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public void invite(User user, Civilisation civilisation) {
-        try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO invites (civilisation, user) VALUES (?, ?)");
-            ps.setString(1, civilisation.getUniqueId().toString());
-            ps.setString(2, user.getUniqueId().toString());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     private String serializeLocation(Location location) {
         // I'm sure there are better methods of doing this, but I've done this now, so we ball.
         return Objects.requireNonNull(location.getWorld()).getName() + "," +

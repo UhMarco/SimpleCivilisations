@@ -1,10 +1,12 @@
 package com.marco.simplecivilisations.sql;
 
 import com.marco.simplecivilisations.SimpleCivilisations;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -120,6 +122,42 @@ public class Civilisation {
         return open;
     }
 
+    public void invite(User user) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO invites (civilisation, user) VALUES (?, ?)");
+            ps.setString(1, uuid.toString());
+            ps.setString(2, user.getUniqueId().toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void uninvite(User user) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("DELETE FROM invites WHERE civilisation=? AND user=?");
+            Bukkit.getLogger().info(uuid.toString());
+            Bukkit.getLogger().info(user.getUniqueId().toString());
+            ps.setString(1, uuid.toString());
+            ps.setString(2, user.getUniqueId().toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isInvited(User user) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) AS count FROM invites WHERE civilisation=? AND user=?");
+            ps.setString(1, uuid.toString());
+            ps.setString(2, user.getUniqueId().toString());
+            ResultSet result = ps.executeQuery();
+            if (result.next() && result.getInt("count") != 0) return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     public Location getWaypoint() {
         return waypoint;
     }

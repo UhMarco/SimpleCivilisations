@@ -13,24 +13,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class InviteCommand extends SubCommand {
-    public InviteCommand(SimpleCivilisations plugin) {
+public class UninviteCommand extends SubCommand {
+    public UninviteCommand(SimpleCivilisations plugin) {
         super(plugin);
     }
 
     @Override
     public List<String> getLabels() {
-        return List.of("invite", "inv");
+        return List.of("uninvite");
     }
 
     @Override
     public String getDescription() {
-        return "Invite a player to your civilisation";
+        return "Remove an invitation to join your civilisation.";
     }
 
     @Override
     public String getUsage() {
-        return "/invite <player>";
+        return "/uninvite <player>";
     }
 
     @Override
@@ -59,23 +59,18 @@ public class InviteCommand extends SubCommand {
                 }
 
                 User target = SQL.getUser(targetPlayer.getUniqueId());
-                if (target.getCivilisationId() != null) {
-                    player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " is already a member of a civilisation.");
-                    return;
-                }
-
                 Civilisation civilisation = SQL.getCivilisation(user);
 
                 if (civilisation.isOpen()) {
                     player.sendMessage(SimpleCivilisations.color + "Your civilisation is open and anyone can join.");
                     return;
-                } else if (civilisation.isInvited(target)) {
-                    player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " has already been invited.");
+                } else if (!civilisation.isInvited(target)) {
+                    player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " has not been invited.");
                     return;
                 }
 
-                civilisation.invite(target);
-                player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " has been invited.");
+                civilisation.uninvite(target);
+                player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " is no longer invited.");
             });
             return;
         }

@@ -19,11 +19,24 @@ public class CivilisationsCommand implements TabExecutor {
         subcommands.add(new DescriptionCommand(plugin));
         subcommands.add(new DisbandCommand(plugin));
         subcommands.add(new InviteCommand(plugin));
+        subcommands.add(new UninviteCommand(plugin));
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length > 0) {
+            if (args.length == 1 && (args[0].equals("help") || args[0].equals("h"))) {
+                ArrayList<String> commands = new ArrayList<>();
+                subcommands.forEach(sb -> {
+                    if (sb.showInHelp) commands.add(sb.getUsage());
+                });
+                sender.sendMessage(SimpleCivilisations.color + "---------- Civilisations ----------\n"
+                        + "Commands:\n"
+                        + String.join("\n", commands)
+                        + "\n-------------------------------"
+                );
+              return true;
+            }
             for (SubCommand sb : subcommands) {
                 if (sb.getLabels().contains(args[0])) {
                     sb.perform(sender, removeFirstElement(args));
@@ -35,16 +48,8 @@ public class CivilisationsCommand implements TabExecutor {
             }
         }
 
-        ArrayList<String> commands = new ArrayList<>();
-        subcommands.forEach(sb -> {
-            if (sb.showInHelp) commands.add(sb.getUsage());
-        });
-        sender.sendMessage(SimpleCivilisations.color + "---------- Civilisations ----------\n"
-                + "Commands:\n"
-                + String.join("\n", commands)
-                + "\n-------------------------------"
-        );
-
+        // Info by default.
+        subcommands.get(0).perform(sender, removeFirstElement(args));
         return true;
     }
 
@@ -52,12 +57,15 @@ public class CivilisationsCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1 || (args.length == 2 && (args[0].equals("help") || args[0].equals("h")))) {
             List<String> labels = new ArrayList<>();
-            subcommands.forEach(sb -> labels.addAll(sb.getLabels()));
+            subcommands.forEach(sb -> {
+                if (sb.getLabels() != null) labels.addAll(sb.getLabels());
+            });
             labels.add("help");
             return labels;
         } else if (args.length > 1) {
             for (SubCommand sb : subcommands) {
-                if (sb.getLabels().contains(args[0])) {
+                List<String> labels = sb.getLabels();
+                if (labels != null && labels.contains(args[0])) {
                     return sb.getTabCompletions(sender, removeFirstElement(args));
                 }
             }
