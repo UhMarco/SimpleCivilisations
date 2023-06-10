@@ -1,4 +1,17 @@
+#file: noinspection SpellCheckingInspection
 name: SimpleCivilisations
 version: '${version}'
 main: com.marco.simplecivilisations.SimpleCivilisations
-api-version: 1.20
+api-version: 1.19
+commands:
+  civilisations:
+    description: The base civilisations command.
+    aliases: [cv, scv, simplecivilisations]
+    usage: /<command> [options...]
+  seen:
+    description: Check when a player was last online.
+    usage: /<command> <player>
+  offlinetp:
+    description: Teleport to an offline player.
+    aliases: [otp]
+    usage: /<command> <player>
