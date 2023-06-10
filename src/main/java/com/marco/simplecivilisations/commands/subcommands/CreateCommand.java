@@ -32,20 +32,20 @@ public class CreateCommand extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (plugin.getSQL().isInCivilisation(player)) {
-                player.sendMessage(SimpleCivilisations.color + "You are already in a civilisation.");
-                return;
-            } else if (args.length == 0) {
-                player.sendMessage(SimpleCivilisations.color + "Usage: " + getUsage());
-                return;
-            } else if (args.length > 1) {
-                player.sendMessage(SimpleCivilisations.color + "Civilisation names cannot contain spaces.");
-                return;
-            } else if (args[0].length() > 20) {
-                player.sendMessage(SimpleCivilisations.color + "Civilisation names cannot exceed 20 characters.");
-                return;
-            }
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                if (plugin.getSQL().isInCivilisation(player)) {
+                    player.sendMessage(SimpleCivilisations.color + "You are already in a civilisation.");
+                    return;
+                } else if (args.length == 0) {
+                    player.sendMessage(SimpleCivilisations.color + "Usage: " + getUsage());
+                    return;
+                } else if (args.length > 1) {
+                    player.sendMessage(SimpleCivilisations.color + "Civilisation names cannot contain spaces.");
+                    return;
+                } else if (args[0].length() > 20) {
+                    player.sendMessage(SimpleCivilisations.color + "Civilisation names cannot exceed 20 characters.");
+                    return;
+                }
                 SQL.createCivilisation(args[0], player);
             });
         } else {

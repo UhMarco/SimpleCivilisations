@@ -16,8 +16,8 @@ public class CivilisationsCommand implements TabExecutor {
     public CivilisationsCommand(SimpleCivilisations plugin) {
         subcommands.add(new InfoCommand(plugin));
         subcommands.add(new CreateCommand(plugin));
-        subcommands.add(new DisbandCommand(plugin));
         subcommands.add(new DescriptionCommand(plugin));
+        subcommands.add(new DisbandCommand(plugin));
         subcommands.add(new InviteCommand(plugin));
     }
 
@@ -35,12 +35,11 @@ public class CivilisationsCommand implements TabExecutor {
             }
         }
 
-        ChatColor c = SimpleCivilisations.color;
         ArrayList<String> commands = new ArrayList<>();
         subcommands.forEach(sb -> {
             if (sb.showInHelp) commands.add(sb.getUsage());
         });
-        sender.sendMessage(c + "---------- Civilisations ----------\n"
+        sender.sendMessage(SimpleCivilisations.color + "---------- Civilisations ----------\n"
                 + "Commands:\n"
                 + String.join("\n", commands)
                 + "\n-------------------------------"
