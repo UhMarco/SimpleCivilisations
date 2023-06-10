@@ -42,6 +42,9 @@ public class DescriptionCommand extends SubCommand {
                 } else if (args.length == 0) {
                     player.sendMessage(SimpleCivilisations.color + getUsage());
                     return;
+                } else if (args[0].length() > 100) {
+                    player.sendMessage(SimpleCivilisations.color + "Civilisation descriptions cannot exceed 100 characters.");
+                    return;
                 }
 
                 civilisation.setDescription(String.join(" ", args));
