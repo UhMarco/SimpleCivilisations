@@ -66,7 +66,8 @@ public class InfoCommand extends SubCommand {
     }
 
     private String civilisationInfo(Civilisation civilisation) {
-        int online = 0;
+        // I am reassigning a local variable.
+        @SuppressWarnings("ReassignedVariable") int online = 0;
         ArrayList<String> members = new ArrayList<>();
         for (UUID member : civilisation.getMembers()) {
             if (Bukkit.getPlayer(member) != null) online += 1;
@@ -78,7 +79,7 @@ public class InfoCommand extends SubCommand {
                         + ChatColor.DARK_AQUA + civilisation.getName() + ChatColor.GRAY + " (" + online + "/" + civilisation.getMembers().size() + ")" + (civilisation.getWaypoint() != null ? " Waypoint: " + ChatColor.DARK_RED + civilisation.getWaypoint().getBlockX() + " " + civilisation.getWaypoint().getBlockZ() : "")
                         + "\n" + SimpleCivilisations.color + "Description: " + ChatColor.GRAY + civilisation.getDescription()
                         + "\n" + SimpleCivilisations.color +  "Leader: " + formatPlayerName(civilisation.getLeader())
-                        + (members.size() > 0 ? "\n" + SimpleCivilisations.color + "Members: " + String.join(", ", members) : "")
+                        + (members.size() > 0 ? "\n" + SimpleCivilisations.color + "Members: " + String.join(ChatColor.GRAY + ", ", members) : "")
                         // TODO: Click here to join if invite or open.
                         + ChatColor.GRAY + "\n-------------------------------"
         );

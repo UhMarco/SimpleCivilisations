@@ -30,7 +30,7 @@ public class InviteCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "/invite <player>";
+    return "/cv invite <player>";
     }
 
     @Override
@@ -69,13 +69,14 @@ public class InviteCommand extends SubCommand {
                 if (civilisation.isOpen()) {
                     player.sendMessage(SimpleCivilisations.color + "Your civilisation is open and anyone can join.");
                     return;
-                } else if (civilisation.isInvited(target)) {
+                } else if (civilisation.hasInvited(target)) {
                     player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " has already been invited.");
                     return;
                 }
 
                 civilisation.invite(target);
-                player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " has been invited.");
+                civilisation.messageOnlineMembers(targetPlayer.getName() + " has been invited.");
+                targetPlayer.sendMessage(SimpleCivilisations.color + "You were invited to join " + civilisation.getName() + ".");
             });
             return;
         }

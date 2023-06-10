@@ -3,6 +3,7 @@ package com.marco.simplecivilisations.sql;
 import com.marco.simplecivilisations.SimpleCivilisations;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class Civilisation {
+    private final MySQL SQL;
     private final Connection connection;
     private final UUID uuid;
     private String name;
@@ -23,6 +25,7 @@ public class Civilisation {
     private Location waypoint;
 
     public Civilisation(SimpleCivilisations plugin, UUID uuid, String name, String description, UUID leader, ArrayList<UUID> members, boolean open, ArrayList<Location> territory, Location waypoint) {
+        this.SQL = plugin.getSQL();
         this.connection = plugin.getSQL().getConnection();
         this.uuid = uuid;
         this.name = name;
@@ -96,26 +99,34 @@ public class Civilisation {
         return members;
     }
 
-    public void setMembers(ArrayList<UUID> members) {
-        this.members = members;
-    }
-
     public void addMember(UUID member) {
         try {
             if (members.contains(member)) return;
-            PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation = ? WHERE uuid = ?");
+            PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation = ?, role = ? WHERE uuid = ?");
             ps.setString(1, uuid.toString());
-            ps.setString(2, member.toString());
+            ps.setInt(2, 0);
+            ps.setString(3, member.toString());
             ps.executeUpdate();
+            uninvite(member);
             members.add(member);
         } catch (SQLException e) {
-            // Really hope this doesn't happen...
             e.printStackTrace();
         }
     }
 
     public void removeMember(UUID member) {
-        members.remove(member);
+        try {
+            if (!members.contains(member) || member == leader) return;
+            PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation = ?, role = ? WHERE uuid = ?");
+            ps.setString(1, null);
+            ps.setInt(2, 0);
+            ps.setString(3, member.toString());
+            ps.executeUpdate();
+            uninvite(member);
+            members.remove(member);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isOpen() {
@@ -133,11 +144,13 @@ public class Civilisation {
         }
     }
 
+    public void uninvite(UUID user) {
+        uninvite(SQL.getUser(user));
+    }
+
     public void uninvite(User user) {
         try {
             PreparedStatement ps = connection.prepareStatement("DELETE FROM invites WHERE civilisation=? AND user=?");
-            Bukkit.getLogger().info(uuid.toString());
-            Bukkit.getLogger().info(user.getUniqueId().toString());
             ps.setString(1, uuid.toString());
             ps.setString(2, user.getUniqueId().toString());
             ps.executeUpdate();
@@ -146,7 +159,7 @@ public class Civilisation {
         }
     }
 
-    public boolean isInvited(User user) {
+    public boolean hasInvited(User user) {
         try {
             PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) AS count FROM invites WHERE civilisation=? AND user=?");
             ps.setString(1, uuid.toString());
@@ -181,5 +194,12 @@ public class Civilisation {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void messageOnlineMembers(String message) {
+        getMembers().forEach(uuid -> {
+            Player p = Bukkit.getPlayer(uuid);
+            if (p != null) p.sendMessage(SimpleCivilisations.color + message);
+        });
     }
 }

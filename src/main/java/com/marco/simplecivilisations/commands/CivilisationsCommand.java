@@ -20,6 +20,8 @@ public class CivilisationsCommand implements TabExecutor {
         subcommands.add(new DisbandCommand(plugin));
         subcommands.add(new InviteCommand(plugin));
         subcommands.add(new UninviteCommand(plugin));
+        subcommands.add(new JoinCommand(plugin));
+        subcommands.add(new LeaveCommand(plugin));
     }
 
     @Override

@@ -48,8 +48,8 @@ public class DisbandCommand extends SubCommand {
                 }
 
                 Civilisation civilisation = SQL.getCivilisation(user);
+                civilisation.messageOnlineMembers(civilisation.getName() + " has been disbanded.");
                 civilisation.disband();
-                player.sendMessage(SimpleCivilisations.color + "Civilisation disbanded.");
             });
             return;
         }

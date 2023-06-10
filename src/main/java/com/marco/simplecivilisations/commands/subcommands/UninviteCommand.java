@@ -30,7 +30,7 @@ public class UninviteCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "/uninvite <player>";
+        return "/cv uninvite <player>";
     }
 
     @Override
@@ -64,7 +64,7 @@ public class UninviteCommand extends SubCommand {
                 if (civilisation.isOpen()) {
                     player.sendMessage(SimpleCivilisations.color + "Your civilisation is open and anyone can join.");
                     return;
-                } else if (!civilisation.isInvited(target)) {
+                } else if (!civilisation.hasInvited(target)) {
                     player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " has not been invited.");
                     return;
                 }
