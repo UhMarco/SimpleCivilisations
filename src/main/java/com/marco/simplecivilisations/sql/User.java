@@ -39,7 +39,7 @@ public class User {
     public void setCivilisationId(UUID civilisation) {
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation=? WHERE uuid=?");
-            ps.setString(1, civilisation.toString());
+            ps.setString(1, civilisation != null ? civilisation.toString() : null);
             ps.setString(2, uuid.toString());
             ps.executeUpdate();
             this.civilisation = civilisation;
@@ -64,27 +64,21 @@ public class User {
         }
     }
 
-    public Location getSpawnPoint() {
-        return spawnPoint;
+    public void setCivilisation(Civilisation civilisation) {
+        setCivilisationId(civilisation != null ? civilisation.getUniqueId() : null);
+        setRole(0);
     }
 
-    public void setSpawnPoint(Location spawnPoint) {
-        this.spawnPoint = spawnPoint;
+    public Location getSpawnPoint() {
+        return spawnPoint;
     }
 
     public Timestamp getLastSession() {
         return lastSession;
     }
 
-    public void setLastSession(Timestamp lastSession) {
-        this.lastSession = lastSession;
-    }
-
     public Location getLastLocation() {
         return lastLocation;
     }
 
-    public void setLastLocation(Location lastLocation) {
-        this.lastLocation = lastLocation;
-    }
 }

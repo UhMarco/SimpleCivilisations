@@ -8,26 +8,28 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-public class DescriptionCommand extends SubCommand {
-    public DescriptionCommand(SimpleCivilisations plugin) {
+public class SetwaypointCommand extends SubCommand {
+    public SetwaypointCommand(SimpleCivilisations plugin) {
         super(plugin);
     }
 
     @Override
     public List<String> getLabels() {
-        return List.of("description", "setdescription");
+        return List.of("setwaypoint");
     }
 
     @Override
     public String getDescription() {
-        return "Set the description of your civilisation.";
+        return "Set the civilisation waypoint.";
     }
 
     @Override
     public String getUsage() {
-        return "/cv description <description>";
+        return "/cv setwaypoint [none]";
     }
 
     @Override
@@ -40,22 +42,26 @@ public class DescriptionCommand extends SubCommand {
                     player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
                     return;
                 } else if (!civilisation.getLeader().toString().equals(player.getUniqueId().toString())) {
-                    player.sendMessage(SimpleCivilisations.color + "Only the leader may set the civilisation description.");
+                    player.sendMessage(SimpleCivilisations.color + "Only the leader may set the civilisation waypoint.");
                     return;
-                } else if (args.length == 0) {
+                } else if (args.length > 1) {
                     player.sendMessage(SimpleCivilisations.color + getUsage());
-                    return;
-                } else if (String.join(" ", args).length() > 100) {
-                    player.sendMessage(SimpleCivilisations.color + "Civilisation descriptions cannot exceed 100 characters.");
                     return;
                 }
 
-                civilisation.setDescription(String.join(" ", args));
-                player.sendMessage(SimpleCivilisations.color + "Civilisation description updated.");
+                boolean clear = args.length == 1 && args[0].equalsIgnoreCase("none");
+                civilisation.setWaypoint(clear ? null : player.getLocation());
+                player.sendMessage(SimpleCivilisations.color + "Civilisation waypoint updated.");
             });
 
             return;
         }
         sender.sendMessage(ChatColor.RED + "Only players may run this command.");
+    }
+
+    @Override
+    public List<String> getTabCompletions(CommandSender sender, String[] args) {
+        if (args.length == 1) return List.of("None");
+        return Collections.emptyList();
     }
 }

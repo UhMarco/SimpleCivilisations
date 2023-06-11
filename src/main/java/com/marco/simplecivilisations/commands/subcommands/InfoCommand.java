@@ -37,7 +37,7 @@ public class InfoCommand extends SubCommand {
             if (args.length == 0) {
                 if (sender instanceof Player player) {
                     Civilisation civilisation = SQL.getCivilisationFromPlayerUUID(player.getUniqueId());
-                    if (civilisation != null) sender.sendMessage(civilisationInfo(civilisation));
+                    if (civilisation != null) sender.sendMessage(civilisationInfo(civilisation,sender));
                     else sender.sendMessage(SimpleCivilisations.color + "You are not a member of a civilisation.");
                 } else {
                     sender.sendMessage(ChatColor.GRAY + "Console must provide full usage: " + getUsage());
@@ -53,7 +53,7 @@ public class InfoCommand extends SubCommand {
                 return;
             }
 
-            sender.sendMessage(civilisationInfo(civilisation));
+            sender.sendMessage(civilisationInfo(civilisation, sender));
         });
     }
 
@@ -65,7 +65,7 @@ public class InfoCommand extends SubCommand {
         return Collections.emptyList();
     }
 
-    private String civilisationInfo(Civilisation civilisation) {
+    private String civilisationInfo(Civilisation civilisation, CommandSender sender) {
         // I am reassigning a local variable.
         @SuppressWarnings("ReassignedVariable") int online = 0;
         ArrayList<String> members = new ArrayList<>();
@@ -74,10 +74,13 @@ public class InfoCommand extends SubCommand {
             if (!Objects.equals(member.toString(), civilisation.getLeader().toString())) members.add(formatPlayerName(member));
         }
 
+        boolean showWaypoint = sender instanceof Player player && civilisation.hasMember((player.getUniqueId()));
+
         return (
                 ChatColor.GRAY + "-------------------------------\n"
-                        + ChatColor.DARK_AQUA + civilisation.getName() + ChatColor.GRAY + " (" + online + "/" + civilisation.getMembers().size() + ")" + (civilisation.getWaypoint() != null ? " Waypoint: " + ChatColor.DARK_RED + civilisation.getWaypoint().getBlockX() + " " + civilisation.getWaypoint().getBlockZ() : "")
+                        + ChatColor.DARK_AQUA + civilisation.getName() + ChatColor.GRAY + " (" + online + "/" + civilisation.getMembers().size() + ")"
                         + "\n" + SimpleCivilisations.color + "Description: " + ChatColor.GRAY + civilisation.getDescription()
+                        + (showWaypoint ? "\n" + SimpleCivilisations.color + "Waypoint: " + ChatColor.GRAY + (civilisation.getWaypoint() != null ? civilisation.getWaypoint().getBlockX() + " " + civilisation.getWaypoint().getBlockZ() : "None") : "")
                         + "\n" + SimpleCivilisations.color +  "Leader: " + formatPlayerName(civilisation.getLeader())
                         + (members.size() > 0 ? "\n" + SimpleCivilisations.color + "Members: " + String.join(ChatColor.GRAY + ", ", members) : "")
                         // TODO: Click here to join if invite or open.

@@ -10,24 +10,24 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class DescriptionCommand extends SubCommand {
-    public DescriptionCommand(SimpleCivilisations plugin) {
+public class RenameCommand extends SubCommand {
+    public RenameCommand(SimpleCivilisations plugin) {
         super(plugin);
     }
 
     @Override
     public List<String> getLabels() {
-        return List.of("description", "setdescription");
+        return List.of("rename");
     }
 
     @Override
     public String getDescription() {
-        return "Set the description of your civilisation.";
+        return "Rename your civilisation.";
     }
 
     @Override
     public String getUsage() {
-        return "/cv description <description>";
+        return "/cv rename <name>";
     }
 
     @Override
@@ -40,18 +40,21 @@ public class DescriptionCommand extends SubCommand {
                     player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
                     return;
                 } else if (!civilisation.getLeader().toString().equals(player.getUniqueId().toString())) {
-                    player.sendMessage(SimpleCivilisations.color + "Only the leader may set the civilisation description.");
+                    player.sendMessage(SimpleCivilisations.color + "Only the leader may rename the civilisation.");
                     return;
                 } else if (args.length == 0) {
                     player.sendMessage(SimpleCivilisations.color + getUsage());
                     return;
-                } else if (String.join(" ", args).length() > 100) {
-                    player.sendMessage(SimpleCivilisations.color + "Civilisation descriptions cannot exceed 100 characters.");
+                } else if (args.length > 1) {
+                    player.sendMessage(SimpleCivilisations.color + "Civilisation names cannot contain spaces.");
+                    return;
+                } else if (args[0].length() > 20) {
+                    player.sendMessage(SimpleCivilisations.color + "Civilisation names cannot exceed 20 characters.");
                     return;
                 }
 
-                civilisation.setDescription(String.join(" ", args));
-                player.sendMessage(SimpleCivilisations.color + "Civilisation description updated.");
+                civilisation.setName(args[0]);
+                player.sendMessage(SimpleCivilisations.color + "Civilisation name updated.");
             });
 
             return;

@@ -14,24 +14,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class InviteCommand extends SubCommand {
-    public InviteCommand(SimpleCivilisations plugin) {
+public class KickCommand extends SubCommand {
+    public KickCommand(SimpleCivilisations plugin) {
         super(plugin);
     }
 
     @Override
     public List<String> getLabels() {
-        return List.of("invite", "inv");
+        return List.of("kick");
     }
 
     @Override
     public String getDescription() {
-        return "Invite a player to your civilisation";
+        return "Kick a member from your civilisation.";
     }
 
     @Override
     public String getUsage() {
-    return "/cv invite <player>";
+        return "/cv kick <player>";
     }
 
     @Override
@@ -42,7 +42,10 @@ public class InviteCommand extends SubCommand {
                 if (user == null) {
                     player.sendMessage(ChatColor.RED + "Something went wrong!");
                     return;
-                } else if (user.getCivilisationId() == null) {
+                }
+
+                Civilisation civilisation = SQL.getCivilisation(user);
+                if (civilisation == null) {
                     player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
                     return;
                 } else if (user.getRole() < 2) {
@@ -59,28 +62,21 @@ public class InviteCommand extends SubCommand {
                 if (uuid == null) {
                     player.sendMessage(SimpleCivilisations.color + "Player not found.");
                     return;
+                } else if (targetPlayer == player) {
+                    player.sendMessage(SimpleCivilisations.color + "No.");
+                    return;
                 }
 
                 User target = SQL.getUser(uuid);
-                if (target.getCivilisationId() != null) {
-                    player.sendMessage(SimpleCivilisations.color + targetName + " is already a member of a civilisation.");
+                if (!civilisation.hasMember(target)) {
+                    player.sendMessage(SimpleCivilisations.color + targetName + " is not a member of the civilisation.");
                     return;
                 }
 
-                Civilisation civilisation = SQL.getCivilisation(user);
-
-                if (civilisation.isOpen()) {
-                    player.sendMessage(SimpleCivilisations.color + "Your civilisation is open and anyone can join.");
-                    return;
-                } else if (civilisation.hasInvited(target)) {
-                    player.sendMessage(SimpleCivilisations.color + targetName + " has already been invited.");
-                    return;
-                }
-
-                civilisation.invite(target);
-                civilisation.messageOnlineMembers(targetName + " has been invited.");
+                civilisation.removeMember(target);
+                civilisation.messageOnlineMembers(targetName + " has been kicked from the civilisation.");
                 if (targetPlayer != null) {
-                    targetPlayer.sendMessage(SimpleCivilisations.color + "You were invited to join " + civilisation.getName() + ".");
+                    targetPlayer.sendMessage(SimpleCivilisations.color + "You were kicked from the civilisation.");
                 }
             });
             return;

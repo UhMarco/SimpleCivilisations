@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class UninviteCommand extends SubCommand {
     public UninviteCommand(SimpleCivilisations plugin) {
@@ -52,25 +53,27 @@ public class UninviteCommand extends SubCommand {
                     return;
                 }
 
+                UUID uuid = SimpleCivilisations.uuidFromName(args[0]);
                 Player targetPlayer = Bukkit.getPlayer(args[0]);
-                if (targetPlayer == null) {
+                String targetName = targetPlayer == null ? args[0] : targetPlayer.getName();
+                if (uuid == null) {
                     player.sendMessage(SimpleCivilisations.color + "Player not found.");
                     return;
                 }
 
-                User target = SQL.getUser(targetPlayer.getUniqueId());
+                User target = SQL.getUser(uuid);
                 Civilisation civilisation = SQL.getCivilisation(user);
 
                 if (civilisation.isOpen()) {
                     player.sendMessage(SimpleCivilisations.color + "Your civilisation is open and anyone can join.");
                     return;
                 } else if (!civilisation.hasInvited(target)) {
-                    player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " has not been invited.");
+                    player.sendMessage(SimpleCivilisations.color + targetName + " has not been invited.");
                     return;
                 }
 
                 civilisation.uninvite(target);
-                player.sendMessage(SimpleCivilisations.color + targetPlayer.getName() + " is no longer invited.");
+                player.sendMessage(SimpleCivilisations.color + targetName + " is no longer invited.");
             });
             return;
         }

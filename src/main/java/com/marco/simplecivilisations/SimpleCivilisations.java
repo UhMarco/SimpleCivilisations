@@ -8,9 +8,12 @@ import com.marco.simplecivilisations.listeners.PlayerQuitListener;
 import com.marco.simplecivilisations.sql.MySQL;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
+import java.util.UUID;
 
 // Yes, this is the British spelling.
 public final class SimpleCivilisations extends JavaPlugin {
@@ -58,5 +61,17 @@ public final class SimpleCivilisations extends JavaPlugin {
 
     public MySQL getSQL() {
         return SQL;
+    }
+
+    public static UUID uuidFromName(String name) {
+        Player p = Bukkit.getPlayer(name);
+        if (p != null) {
+            return p.getUniqueId();
+        }
+        @SuppressWarnings("deprecation") OfflinePlayer o = Bukkit.getOfflinePlayer(name);
+        if (o.hasPlayedBefore()) {
+            return o.getUniqueId();
+        }
+        return null;
     }
 }

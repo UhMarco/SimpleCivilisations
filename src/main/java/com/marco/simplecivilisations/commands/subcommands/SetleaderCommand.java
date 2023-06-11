@@ -14,24 +14,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class InviteCommand extends SubCommand {
-    public InviteCommand(SimpleCivilisations plugin) {
+public class SetleaderCommand extends SubCommand {
+    public SetleaderCommand(SimpleCivilisations plugin) {
         super(plugin);
     }
 
     @Override
     public List<String> getLabels() {
-        return List.of("invite", "inv");
+        return List.of("setleader", "leader");
     }
 
     @Override
     public String getDescription() {
-        return "Invite a player to your civilisation";
+        return "Give leader to another member of the civilisation.";
     }
 
     @Override
     public String getUsage() {
-    return "/cv invite <player>";
+        return "/cv setleader <player>";
     }
 
     @Override
@@ -45,11 +45,8 @@ public class InviteCommand extends SubCommand {
                 } else if (user.getCivilisationId() == null) {
                     player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
                     return;
-                } else if (user.getRole() < 2) {
-                    player.sendMessage(SimpleCivilisations.color + "You need a higher seniority level within your civilisation to run this command.");
-                    return;
-                } else if (args.length != 1) {
-                    player.sendMessage(SimpleCivilisations.color + "Usage: " + getUsage());
+                } else if (user.getRole() < 3) {
+                    player.sendMessage(SimpleCivilisations.color + "Only the leader of your civilisation can run this command.");
                     return;
                 }
 
@@ -59,33 +56,24 @@ public class InviteCommand extends SubCommand {
                 if (uuid == null) {
                     player.sendMessage(SimpleCivilisations.color + "Player not found.");
                     return;
-                }
-
-                User target = SQL.getUser(uuid);
-                if (target.getCivilisationId() != null) {
-                    player.sendMessage(SimpleCivilisations.color + targetName + " is already a member of a civilisation.");
+                } else if (targetPlayer == player) {
+                    player.sendMessage(SimpleCivilisations.color + "You are already the leader of this civilisation.");
                     return;
                 }
 
                 Civilisation civilisation = SQL.getCivilisation(user);
-
-                if (civilisation.isOpen()) {
-                    player.sendMessage(SimpleCivilisations.color + "Your civilisation is open and anyone can join.");
-                    return;
-                } else if (civilisation.hasInvited(target)) {
-                    player.sendMessage(SimpleCivilisations.color + targetName + " has already been invited.");
+                if (!civilisation.hasMember(uuid)) {
+                    player.sendMessage(SimpleCivilisations.color + targetName + " is not a member of your civilisation.");
                     return;
                 }
 
-                civilisation.invite(target);
-                civilisation.messageOnlineMembers(targetName + " has been invited.");
-                if (targetPlayer != null) {
-                    targetPlayer.sendMessage(SimpleCivilisations.color + "You were invited to join " + civilisation.getName() + ".");
-                }
+                civilisation.setLeader(uuid);
+                civilisation.messageOnlineMembers(targetName + " has been promoted to the leader of the civilisation.");
             });
+
             return;
         }
-        sender.sendMessage(ChatColor.RED + "Only players can run this command.");
+        sender.sendMessage(ChatColor.RED + "Only players may run this command.");
     }
 
     @Override

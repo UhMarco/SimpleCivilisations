@@ -58,7 +58,7 @@ public class MySQL {
         Bukkit.getLogger().info("[SimpleCivilisations] Completing setup...");
         try {
             PreparedStatement ps1 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (uuid TEXT, civilisation TEXT, role INT, spawnPoint TEXT, lastSession TIMESTAMP, lastLocation TEXT, PRIMARY KEY (uuid(255)))");
-            PreparedStatement ps2 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS civilisations (uuid TEXT, name TEXT, description TEXT, leader TEXT, open BOOLEAN, waypoint JSON, PRIMARY KEY (uuid(255)))");
+            PreparedStatement ps2 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS civilisations (uuid TEXT, name TEXT, description TEXT, leader TEXT, open BOOLEAN, waypoint TEXT, PRIMARY KEY (uuid(255)))");
             PreparedStatement ps3 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS territories (civilisation TEXT, location TEXT, PRIMARY KEY (civilisation(255), location(255)))");
             PreparedStatement ps4 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS invites (civilisation TEXT, user TEXT, PRIMARY KEY (civilisation(255), user(255)))");
             ps1.executeUpdate();
@@ -94,13 +94,13 @@ public class MySQL {
             ps.setInt(3, 0);
 
             // TODO: Generate a random location and never change it.
-            ps.setObject(4, serializeLocation(player.getBedSpawnLocation() != null
+            ps.setObject(4, serialiseLocation(player.getBedSpawnLocation() != null
                     ? player.getBedSpawnLocation()
                     : player.getWorld().getSpawnLocation())
             );
 
             ps.setTimestamp(5, Timestamp.from(Instant.now()));
-            ps.setString(6, serializeLocation(player.getLocation()));
+            ps.setString(6, serialiseLocation(player.getLocation()));
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -116,7 +116,7 @@ public class MySQL {
             } else {
                 PreparedStatement ps = connection.prepareStatement("UPDATE users SET lastSession = ?, lastLocation = ? WHERE UUID = ?");
                 ps.setTimestamp(1, Timestamp.from(Instant.now()));
-                ps.setString(2, serializeLocation(player.getLocation()));
+                ps.setString(2, serialiseLocation(player.getLocation()));
                 ps.setString(3, uuid.toString());
                 ps.executeUpdate();
             }
@@ -138,9 +138,9 @@ public class MySQL {
                             uuid,
                             potentialUuid != null ? UUID.fromString(potentialUuid) : null,
                             results.getInt("role"),
-                            deserializeLocation(results.getString("spawnPoint")),
+                            deserialiseLocation(results.getString("spawnPoint")),
                             results.getTimestamp("lastSession"),
-                            deserializeLocation(results.getString("lastLocation"))
+                            deserialiseLocation(results.getString("lastLocation"))
                     );
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -292,7 +292,7 @@ public class MySQL {
                 pst.setString(1, uuid.toString());
                 ResultSet territoryResult = pst.executeQuery();
                 while (territoryResult.next()) {
-                    territory.add(deserializeLocation(territoryResult.getString("location")));
+                    territory.add(deserialiseLocation(territoryResult.getString("location")));
                 }
 
                 String waypoint = results.getString("waypoint");
@@ -307,7 +307,7 @@ public class MySQL {
                             members,
                             results.getBoolean("open"),
                             territory,
-                            waypoint != null ? deserializeLocation(waypoint) : null
+                            waypoint != null ? deserialiseLocation(waypoint) : null
                     );
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -319,7 +319,7 @@ public class MySQL {
         return null;
     }
 
-    private String serializeLocation(Location location) {
+    public String serialiseLocation(Location location) {
         // I'm sure there are better methods of doing this, but I've done this now, so we ball.
         return Objects.requireNonNull(location.getWorld()).getName() + "," +
                 location.getX() + "," +
@@ -329,7 +329,7 @@ public class MySQL {
                 location.getPitch();
     }
 
-    private Location deserializeLocation(String locationString) {
+    public Location deserialiseLocation(String locationString) {
         String[] parts = locationString.split(",");
         if (parts.length >= 6) {
             String worldName = parts[0];

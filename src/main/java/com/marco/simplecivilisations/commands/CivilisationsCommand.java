@@ -16,12 +16,17 @@ public class CivilisationsCommand implements TabExecutor {
     public CivilisationsCommand(SimpleCivilisations plugin) {
         subcommands.add(new InfoCommand(plugin));
         subcommands.add(new CreateCommand(plugin));
+        subcommands.add(new RenameCommand(plugin));
         subcommands.add(new DescriptionCommand(plugin));
         subcommands.add(new DisbandCommand(plugin));
+        subcommands.add(new SetleaderCommand(plugin));
+        subcommands.add(new WaypointCommand(plugin));
+        subcommands.add(new SetwaypointCommand(plugin));
         subcommands.add(new InviteCommand(plugin));
         subcommands.add(new UninviteCommand(plugin));
         subcommands.add(new JoinCommand(plugin));
         subcommands.add(new LeaveCommand(plugin));
+        subcommands.add(new KickCommand(plugin));
     }
 
     @Override
@@ -60,9 +65,13 @@ public class CivilisationsCommand implements TabExecutor {
         if (args.length == 1 || (args.length == 2 && (args[0].equals("help") || args[0].equals("h")))) {
             List<String> labels = new ArrayList<>();
             subcommands.forEach(sb -> {
-                if (sb.getLabels() != null) labels.addAll(sb.getLabels());
+                if (sb.getLabels() != null) {
+                    for (String l : sb.getLabels()) {
+                        if (l.toLowerCase().startsWith(args[args.length - 1].toLowerCase())) labels.add(l);
+                    }
+                }
             });
-            labels.add("help");
+            if (args.length == 1 && "help".startsWith(args[0])) labels.add("help");
             return labels;
         } else if (args.length > 1) {
             for (SubCommand sb : subcommands) {

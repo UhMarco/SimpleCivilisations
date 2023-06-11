@@ -46,7 +46,15 @@ public class Civilisation {
     }
 
     public void setName(String name) {
-        this.name = name;
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE civilisations SET name = ? WHERE uuid = ?");
+            ps.setString(1, name);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+            this.name = name;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getDescription() {
@@ -99,31 +107,33 @@ public class Civilisation {
         return members;
     }
 
-    public void addMember(UUID member) {
+    public void addMember(User member) {
         try {
-            if (members.contains(member)) return;
+            if (members.contains(member.getUniqueId())) return;
             PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation = ?, role = ? WHERE uuid = ?");
             ps.setString(1, uuid.toString());
             ps.setInt(2, 0);
             ps.setString(3, member.toString());
             ps.executeUpdate();
             uninvite(member);
-            members.add(member);
+            members.add(member.getUniqueId());
+            member.setCivilisation(this);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void removeMember(UUID member) {
+    public void removeMember(User member) {
         try {
-            if (!members.contains(member) || member == leader) return;
+            if (!members.contains(member.getUniqueId()) || member.getUniqueId() == leader) return;
             PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation = ?, role = ? WHERE uuid = ?");
             ps.setString(1, null);
             ps.setInt(2, 0);
             ps.setString(3, member.toString());
             ps.executeUpdate();
             uninvite(member);
-            members.remove(member);
+            members.remove(member.getUniqueId());
+            member.setCivilisation(null);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -142,10 +152,6 @@ public class Civilisation {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public void uninvite(UUID user) {
-        uninvite(SQL.getUser(user));
     }
 
     public void uninvite(User user) {
@@ -175,6 +181,18 @@ public class Civilisation {
         return waypoint;
     }
 
+    public void setWaypoint(Location waypoint) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE civilisations SET waypoint=? WHERE uuid=?");
+            ps.setString(1, waypoint != null ? SQL.serialiseLocation(waypoint) : null);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+            this.waypoint = waypoint;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void disband() {
         try {
             PreparedStatement c = connection.prepareStatement("DELETE FROM civilisations WHERE uuid=?");
@@ -201,5 +219,13 @@ public class Civilisation {
             Player p = Bukkit.getPlayer(uuid);
             if (p != null) p.sendMessage(SimpleCivilisations.color + message);
         });
+    }
+
+    public boolean hasMember(User user) {
+        return hasMember(user.getUniqueId());
+    }
+
+    public boolean hasMember(UUID u) {
+        return members.contains(u);
     }
 }
