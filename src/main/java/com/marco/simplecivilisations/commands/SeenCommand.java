@@ -67,7 +67,7 @@ public class SeenCommand implements TabExecutor {
         return Collections.emptyList();
     }
 
-    private String getTimestampDifference(Timestamp timestamp1, Timestamp timestamp2) {
+    public static String getTimestampDifference(Timestamp timestamp1, Timestamp timestamp2) {
         Duration duration = Duration.between(timestamp1.toInstant(), timestamp2.toInstant());
 
         long years = duration.toDays() / 365;

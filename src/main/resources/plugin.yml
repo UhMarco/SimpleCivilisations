@@ -8,6 +8,10 @@ commands:
     description: The base civilisations command.
     aliases: [cv, scv, simplecivilisations]
     usage: /<command> [options...]
+  revive:
+    description: Revive a player.
+    usage: /<command> <player>
+    permission: simplecivilisations.revive
   seen:
     description: Check when a player was last online.
     usage: /<command> <player>

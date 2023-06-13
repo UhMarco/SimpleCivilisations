@@ -9,9 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.sql.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class MySQL {
     private final SimpleCivilisations plugin;
@@ -57,7 +55,7 @@ public class MySQL {
     public void createTables() {
         Bukkit.getLogger().info("[SimpleCivilisations] Completing setup...");
         try {
-            PreparedStatement ps1 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (uuid TEXT, civilisation TEXT, role INT, spawnPoint TEXT, lastSession TIMESTAMP, lastLocation TEXT, PRIMARY KEY (uuid(255)))");
+            PreparedStatement ps1 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (uuid TEXT, civilisation TEXT, role INT, spawnPoint TEXT, lastSession TIMESTAMP, lastLocation TEXT, lives INT, lastDeath TIMESTAMP NULL, PRIMARY KEY (uuid(255)))");
             PreparedStatement ps2 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS civilisations (uuid TEXT, name TEXT, description TEXT, leader TEXT, open BOOLEAN, waypoint TEXT, PRIMARY KEY (uuid(255)))");
             PreparedStatement ps3 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS territories (civilisation TEXT, location TEXT, PRIMARY KEY (civilisation(255), location(255)))");
             PreparedStatement ps4 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS invites (civilisation TEXT, user TEXT, PRIMARY KEY (civilisation(255), user(255)))");
@@ -83,29 +81,44 @@ public class MySQL {
         return false;
     }
 
-    public void createUser(Player player) {
+    public User createUser(Player player) {
         try {
             UUID uuid = player.getUniqueId();
-            if (exists(uuid)) return;
+            if (exists(uuid)) return getUser(player.getUniqueId());
 
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO users (uuid, civilisation, role, spawnPoint, lastSession, lastLocation) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO users (uuid, civilisation, role, spawnPoint, lastSession, lastLocation, lives, lastDeath) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             ps.setString(1, uuid.toString());
             ps.setString(2, null);
             ps.setInt(3, 0);
 
-            // TODO: Generate a random location and never change it.
-            ps.setObject(4, serialiseLocation(player.getBedSpawnLocation() != null
-                    ? player.getBedSpawnLocation()
-                    : player.getWorld().getSpawnLocation())
-            );
+
+            Location location = plugin.spawns.remove(0);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> plugin.generateSpawns(1));
+            ps.setObject(4, serialiseLocation(location));
+
+            Bukkit.getScheduler().runTask(plugin, () -> player.teleport(location));
 
             ps.setTimestamp(5, Timestamp.from(Instant.now()));
             ps.setString(6, serialiseLocation(player.getLocation()));
+            ps.setInt(7, 0);
+            ps.setTimestamp(8, null);
 
             ps.executeUpdate();
+            return new User(
+                    plugin,
+                    uuid,
+                    null,
+                    0,
+                    player.getWorld().getSpawnLocation(),
+                    Timestamp.from(Instant.now()),
+                    player.getLocation(),
+                    0,
+                    null
+            );
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public void updateSession(Player player) {
@@ -140,7 +153,9 @@ public class MySQL {
                             results.getInt("role"),
                             deserialiseLocation(results.getString("spawnPoint")),
                             results.getTimestamp("lastSession"),
-                            deserialiseLocation(results.getString("lastLocation"))
+                            deserialiseLocation(results.getString("lastLocation")),
+                            results.getInt("lives"),
+                            results.getTimestamp("lastDeath")
                     );
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -17,8 +17,10 @@ public class User {
     private Location spawnPoint;
     private Timestamp lastSession;
     private Location lastLocation;
+    private int lives;
+    private Timestamp lastDeath;
 
-    public User(SimpleCivilisations plugin, UUID uuid, UUID civilisation, int role, Location spawnLocation,Timestamp lastSession, Location lastLocation) {
+    public User(SimpleCivilisations plugin, UUID uuid, UUID civilisation, int role, Location spawnLocation,Timestamp lastSession, Location lastLocation, int lives, Timestamp lastDeath) {
         this.connection = plugin.getSQL().getConnection();
         this.uuid = uuid;
         this.civilisation = civilisation;
@@ -26,6 +28,8 @@ public class User {
         this.spawnPoint = spawnLocation;
         this.lastSession = lastSession;
         this.lastLocation = lastLocation;
+        this.lives = lives;
+        this.lastDeath = lastDeath;
     }
 
     public UUID getUniqueId() {
@@ -79,6 +83,22 @@ public class User {
 
     public Location getLastLocation() {
         return lastLocation;
+    }
+
+    public void setLastDeath(Timestamp lastDeath) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE users SET lastDeath=? WHERE uuid=?");
+            ps.setTimestamp(1, lastDeath);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+            this.lastDeath = lastDeath;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Timestamp getLastDeath() {
+        return lastDeath;
     }
 
 }

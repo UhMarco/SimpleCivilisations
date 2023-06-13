@@ -2,16 +2,16 @@ package com.marco.simplecivilisations.listeners;
 
 import com.marco.simplecivilisations.SimpleCivilisations;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 
-public class PlayerQuitListener extends EventListener {
+public class PlayerKickListener extends EventListener {
 
-    public PlayerQuitListener(SimpleCivilisations plugin) {
+    public PlayerKickListener(SimpleCivilisations plugin) {
         super(plugin);
     }
 
     @EventHandler
-    public void listen(PlayerQuitEvent event) {
+    public void listen(PlayerKickEvent event) {
         plugin.getSQL().updateSession(event.getPlayer());
     }
 }
