@@ -163,7 +163,7 @@ public class PlacePillarCommand extends SubCommand {
         for (Civilisation civilisation : plugin.civilisations.values()) {
             for (Pillar pillar : civilisation.getPillars()) {
                 if (pillar.getCivilisationId() == uuid && pillar.isActive()) {
-                    if (location.distance(pillar.getLocation()) <= 10) {
+                    if (SimpleCivilisations.inRangeOfPillar(location, pillar)) {
                         return true;
                     }
                 } else {
