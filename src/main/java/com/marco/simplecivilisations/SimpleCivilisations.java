@@ -5,6 +5,7 @@ import com.marco.simplecivilisations.listeners.*;
 import com.marco.simplecivilisations.sql.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -190,14 +191,16 @@ public final class SimpleCivilisations extends JavaPlugin {
             int x = r.nextInt(minX, maxX);
             int z = r.nextInt(minZ, maxZ);
             Block block = world.getHighestBlockAt(x, z);
+            Block above = block.getRelative(BlockFace.UP);
             Location l = new Location(world, x + 0.5, block.getY() + 1, z + 0.5);
-            if (isValid(block)) spawns.add(l);
+            if (isValid(block) && isValid(above)) spawns.add(l);
             else i -= 1;
         }
     }
 
     private boolean isValid(Block block) {
-        if (block.isEmpty() || block.isLiquid()) return false;
+        if (block == null) return true;
+        if (block.isLiquid()) return false;
         if (block.getType().toString().endsWith("LEAVES")) return false;
         if (List.of(Material.CACTUS, Material.MAGMA_BLOCK, Material.SWEET_BERRY_BUSH, Material.POWDER_SNOW, Material.SNOW).contains(block.getType())) return false;
         return true;

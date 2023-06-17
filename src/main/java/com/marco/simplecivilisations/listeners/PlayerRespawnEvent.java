@@ -21,6 +21,7 @@ public class PlayerRespawnEvent extends EventListener {
         user.setLastDeath(Timestamp.from(Instant.now()));
         Location bed = event.getPlayer().getBedSpawnLocation();
         event.setRespawnLocation(bed != null ? bed : user.getSpawnPoint());
+        plugin.getSQL().updateSession(event.getPlayer());
         Bukkit.getScheduler().runTask(plugin, () -> {
             event.getPlayer().kickPlayer("You died.");
         });
