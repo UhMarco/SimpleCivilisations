@@ -56,8 +56,8 @@ public class MySQL {
         Bukkit.getLogger().info("[SimpleCivilisations] Completing setup...");
         try {
             PreparedStatement ps1 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (uuid TEXT, civilisation TEXT, role INT, spawnPoint TEXT, lastSession TIMESTAMP, lastLocation TEXT, lives INT, lastDeath TIMESTAMP NULL, PRIMARY KEY (uuid(255)))");
-            PreparedStatement ps2 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS civilisations (uuid TEXT, name TEXT, description TEXT, leader TEXT, open BOOLEAN, waypoint TEXT, PRIMARY KEY (uuid(255)))");
-            PreparedStatement ps3 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS territories (civilisation TEXT, location TEXT, PRIMARY KEY (civilisation(255), location(255)))");
+            PreparedStatement ps2 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS civilisations (uuid TEXT, name TEXT, description TEXT, leader TEXT, open BOOLEAN, pillarsAvailable INT, waypoint TEXT, PRIMARY KEY (uuid(255)))");
+            PreparedStatement ps3 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS pillars (civilisation TEXT, location TEXT, destroyed TIMESTAMP NULL, PRIMARY KEY (civilisation(255), location(255)))");
             PreparedStatement ps4 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS invites (civilisation TEXT, user TEXT, PRIMARY KEY (civilisation(255), user(255)))");
             ps1.executeUpdate();
             ps2.executeUpdate();
@@ -104,7 +104,7 @@ public class MySQL {
             ps.setTimestamp(8, null);
 
             ps.executeUpdate();
-            return new User(
+            User user = new User(
                     plugin,
                     uuid,
                     null,
@@ -115,6 +115,8 @@ public class MySQL {
                     0,
                     null
             );
+            plugin.users.put(uuid, user);
+            return user;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -122,6 +124,9 @@ public class MySQL {
     }
 
     public void updateSession(Player player) {
+        // MASSIVE WARNING TO MYSELF
+        // I'm not updating this in memory because I don't have to rn.
+        // If I ever try to fetch this information from memory, and it is stale, I'm reserving the right to tell myself "I told you so".
         try {
             UUID uuid = player.getUniqueId();
             if (!exists(uuid)) {
@@ -167,20 +172,6 @@ public class MySQL {
         return null;
     }
 
-    public boolean isInCivilisation(Player player) {
-        try {
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE uuid = ?");
-            ps.setString(1, player.getUniqueId().toString());
-            ResultSet results = ps.executeQuery();
-            if (results.next()) {
-                return results.getString("civilisation") != null;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     public Civilisation createCivilisation(String name, Player player) {
         try {
             // Check if the name is taken.
@@ -197,13 +188,14 @@ public class MySQL {
                 return null;
             }
 
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO civilisations (uuid, name, description, leader, open, waypoint) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO civilisations (uuid, name, description, leader, open, pillarsAvailable, waypoint) VALUES (?, ?, ?, ?, ?, ?, ?)");
             ps.setString(1, uuid.toString());
             ps.setString(2, name);
             ps.setString(3, "No description.");
             ps.setString(4, player.getUniqueId().toString());
             ps.setBoolean(5, false);
-            ps.setString(6, null);
+            ps.setInt(6, 5); // TODO: Determine how many pillars a civilisation should have access to.
+            ps.setString(7, null);
             ps.executeUpdate();
 
             player.sendMessage(SimpleCivilisations.color + "Civilisation created.");
@@ -216,6 +208,7 @@ public class MySQL {
                     new ArrayList<>(),
                     false,
                     new ArrayList<>(),
+                    1,
                     null
             );
             civilisation.setLeader(player.getUniqueId());
@@ -271,10 +264,6 @@ public class MySQL {
         return null;
     }
 
-    public Civilisation getCivilisation(User user) {
-        return getCivilisation(user.getCivilisationId());
-    }
-
     public Civilisation getCivilisation(UUID uuid) {
         try {
             PreparedStatement ps = connection.prepareStatement("SELECT * FROM civilisations WHERE uuid = ?");
@@ -302,12 +291,17 @@ public class MySQL {
                     members.add(UUID.fromString(mUUID));
                 }
 
-                ArrayList<Location> territory = new ArrayList<>();
-                PreparedStatement pst = connection.prepareStatement("SELECT * FROM territories WHERE civilisation = ?");
-                pst.setString(1, uuid.toString());
-                ResultSet territoryResult = pst.executeQuery();
-                while (territoryResult.next()) {
-                    territory.add(deserialiseLocation(territoryResult.getString("location")));
+                ArrayList<Pillar> pillars = new ArrayList<>();
+                PreparedStatement psp = connection.prepareStatement("SELECT * FROM pillars WHERE civilisation = ?");
+                psp.setString(1, uuid.toString());
+                ResultSet pillarsResult = psp.executeQuery();
+                while (pillarsResult.next()) {
+                    pillars.add(new Pillar(
+                            plugin,
+                            uuid,
+                            deserialiseLocation(pillarsResult.getString("location")),
+                            pillarsResult.getTimestamp("destroyed")
+                    ));
                 }
 
                 String waypoint = results.getString("waypoint");
@@ -321,7 +315,8 @@ public class MySQL {
                             UUID.fromString(results.getString("leader")),
                             members,
                             results.getBoolean("open"),
-                            territory,
+                            pillars,
+                            results.getInt("pillarsAvailable"),
                             waypoint != null ? deserialiseLocation(waypoint) : null
                     );
                 } catch (Exception e) {
@@ -334,7 +329,7 @@ public class MySQL {
         return null;
     }
 
-    public String serialiseLocation(Location location) {
+    public static String serialiseLocation(Location location) {
         // I'm sure there are better methods of doing this, but I've done this now, so we ball.
         return Objects.requireNonNull(location.getWorld()).getName() + "," +
                 location.getX() + "," +
@@ -344,7 +339,7 @@ public class MySQL {
                 location.getPitch();
     }
 
-    public Location deserialiseLocation(String locationString) {
+    public static Location deserialiseLocation(String locationString) {
         String[] parts = locationString.split(",");
         if (parts.length >= 6) {
             String worldName = parts[0];

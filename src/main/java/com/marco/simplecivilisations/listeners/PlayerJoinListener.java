@@ -20,10 +20,9 @@ public class PlayerJoinListener extends EventListener {
     public void listen(PlayerJoinEvent event) {
         User user = plugin.getSQL().createUser(event.getPlayer());
         if (user.getLastDeath() == null) return;
-        // TODO: get deathban duration from config.
-        int minutes = 15;
+        int minutes = plugin.getConfig().getInt("deathban");
         Duration duration = Duration.between(user.getLastDeath().toInstant(), Instant.now());
-        if (duration.toMinutes() > minutes) {
+        if (duration.toMinutes() >= minutes) {
             user.setLastDeath(null);
         } else {
             Timestamp timeWhenNotBanned = Timestamp.from(user.getLastDeath().toInstant().plusSeconds(TimeUnit.MINUTES.toSeconds(minutes)));

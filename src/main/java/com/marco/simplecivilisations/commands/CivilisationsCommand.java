@@ -16,6 +16,8 @@ public class CivilisationsCommand implements TabExecutor {
     public CivilisationsCommand(SimpleCivilisations plugin) {
         subcommands.add(new InfoCommand(plugin));
         subcommands.add(new CreateCommand(plugin));
+        subcommands.add(new PlacePillarCommand(plugin));
+        subcommands.add(new RemovePillarCommand(plugin));
         subcommands.add(new RenameCommand(plugin));
         subcommands.add(new DescriptionCommand(plugin));
         subcommands.add(new DisbandCommand(plugin));

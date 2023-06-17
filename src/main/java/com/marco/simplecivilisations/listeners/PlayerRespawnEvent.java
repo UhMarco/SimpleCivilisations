@@ -17,7 +17,7 @@ public class PlayerRespawnEvent extends EventListener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void listen(org.bukkit.event.player.PlayerRespawnEvent event) {
-        User user = plugin.getSQL().getUser(event.getPlayer().getUniqueId());
+        User user = plugin.users.get(event.getPlayer().getUniqueId());
         user.setLastDeath(Timestamp.from(Instant.now()));
         Location bed = event.getPlayer().getBedSpawnLocation();
         event.setRespawnLocation(bed != null ? bed : user.getSpawnPoint());

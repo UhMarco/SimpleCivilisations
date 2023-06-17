@@ -37,36 +37,36 @@ public class SetleaderCommand extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
+            User user = plugin.users.get(player.getUniqueId());
+            if (user == null) {
+                player.sendMessage(ChatColor.RED + "Something went wrong!");
+                return;
+            } else if (user.getCivilisationId() == null) {
+                player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
+                return;
+            } else if (user.getRole() < 3) {
+                player.sendMessage(SimpleCivilisations.color + "Only the leader of your civilisation can run this command.");
+                return;
+            }
+
+            UUID uuid = SimpleCivilisations.uuidFromName(args[0]);
+            Player targetPlayer = Bukkit.getPlayer(args[0]);
+            String targetName = targetPlayer == null ? args[0] : targetPlayer.getName();
+            if (uuid == null) {
+                player.sendMessage(SimpleCivilisations.color + "Player not found.");
+                return;
+            } else if (targetPlayer == player) {
+                player.sendMessage(SimpleCivilisations.color + "You are already the leader of this civilisation.");
+                return;
+            }
+
+            Civilisation civilisation = plugin.civilisations.get(user.getCivilisationId());
+            if (!civilisation.hasMember(uuid)) {
+                player.sendMessage(SimpleCivilisations.color + targetName + " is not a member of your civilisation.");
+                return;
+            }
+
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                User user = SQL.getUser(player.getUniqueId());
-                if (user == null) {
-                    player.sendMessage(ChatColor.RED + "Something went wrong!");
-                    return;
-                } else if (user.getCivilisationId() == null) {
-                    player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
-                    return;
-                } else if (user.getRole() < 3) {
-                    player.sendMessage(SimpleCivilisations.color + "Only the leader of your civilisation can run this command.");
-                    return;
-                }
-
-                UUID uuid = SimpleCivilisations.uuidFromName(args[0]);
-                Player targetPlayer = Bukkit.getPlayer(args[0]);
-                String targetName = targetPlayer == null ? args[0] : targetPlayer.getName();
-                if (uuid == null) {
-                    player.sendMessage(SimpleCivilisations.color + "Player not found.");
-                    return;
-                } else if (targetPlayer == player) {
-                    player.sendMessage(SimpleCivilisations.color + "You are already the leader of this civilisation.");
-                    return;
-                }
-
-                Civilisation civilisation = SQL.getCivilisation(user);
-                if (!civilisation.hasMember(uuid)) {
-                    player.sendMessage(SimpleCivilisations.color + targetName + " is not a member of your civilisation.");
-                    return;
-                }
-
                 civilisation.setLeader(uuid);
                 civilisation.messageOnlineMembers(targetName + " has been promoted to the leader of the civilisation.");
             });

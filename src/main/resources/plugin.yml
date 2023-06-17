@@ -19,3 +19,8 @@ commands:
     description: Teleport to an offline player.
     aliases: [otp]
     usage: /<command> <player>
+  screload:
+    description: Reload the config.
+    aliases: [cvreload]
+    usage: /<command>
+    permission: simplecivilisations.reload

@@ -9,22 +9,25 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Civilisation {
+    private final SimpleCivilisations plugin;
     private final MySQL SQL;
     private final Connection connection;
     private final UUID uuid;
     private String name;
     private String description;
     private UUID leader;
-    private ArrayList<UUID> members;
+    private List<UUID> members;
     private boolean open;
-    private ArrayList<Location> territory;
+    private List<Pillar> pillars;
+    private int pillarsAvailable;
     private Location waypoint;
 
-    public Civilisation(SimpleCivilisations plugin, UUID uuid, String name, String description, UUID leader, ArrayList<UUID> members, boolean open, ArrayList<Location> territory, Location waypoint) {
+    public Civilisation(SimpleCivilisations plugin, UUID uuid, String name, String description, UUID leader, List<UUID> members, boolean open, List<Pillar> pillars, int pillarsAvailable, Location waypoint) {
+        this.plugin = plugin;
         this.SQL = plugin.getSQL();
         this.connection = plugin.getSQL().getConnection();
         this.uuid = uuid;
@@ -33,7 +36,8 @@ public class Civilisation {
         this.leader = leader;
         this.members = members;
         this.open = open;
-        this.territory = territory;
+        this.pillars = pillars;
+        this.pillarsAvailable = pillarsAvailable;
         this.waypoint = waypoint;
     }
 
@@ -103,7 +107,7 @@ public class Civilisation {
         }
     }
 
-    public ArrayList<UUID> getMembers() {
+    public List<UUID> getMembers() {
         return members;
     }
 
@@ -203,7 +207,7 @@ public class Civilisation {
             u.setInt(2, 0);
             u.setString(3, uuid.toString());
             u.executeUpdate();
-            PreparedStatement t = connection.prepareStatement("DELETE FROM territories WHERE civilisation=?");
+            PreparedStatement t = connection.prepareStatement("DELETE FROM pillars WHERE civilisation=?");
             t.setString(1, uuid.toString());
             t.executeUpdate();
             PreparedStatement i = connection.prepareStatement("DELETE FROM invites WHERE civilisation=?");
@@ -227,5 +231,55 @@ public class Civilisation {
 
     public boolean hasMember(UUID u) {
         return members.contains(u);
+    }
+
+    public int getPillarsAvailable() {
+        return pillarsAvailable;
+    }
+
+    public void usePillar() {
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE civilisations SET pillarsAvailable=? WHERE uuid=?");
+            ps.setInt(1, pillarsAvailable - 1);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+            pillarsAvailable--;
+        } catch (SQLException e ) {
+            e.printStackTrace();
+        }
+    }
+
+    public void gainPillar() {
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE civilisations SET pillarsAvailable=? WHERE uuid=?");
+            ps.setInt(1, pillarsAvailable + 1);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+            pillarsAvailable ++;
+        } catch (SQLException e ) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addPillar(Location location) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO pillars (civilisation, location, active) VALUES (?, ?, ?)");
+            ps.setString(1, uuid.toString());
+            ps.setString(2, MySQL.serialiseLocation(location));
+            ps.setBoolean(3, true);
+            ps.executeUpdate();
+            pillars.add(new Pillar(
+                    plugin,
+                    uuid,
+                    location,
+                    null
+            ));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Pillar> getPillars() {
+        return pillars;
     }
 }

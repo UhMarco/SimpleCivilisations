@@ -33,26 +33,24 @@ public class InfoCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            if (args.length == 0) {
-                if (sender instanceof Player player) {
-                    Civilisation civilisation = SQL.getCivilisationFromPlayerUUID(player.getUniqueId());
-                    if (civilisation != null) sender.sendMessage(civilisationInfo(civilisation,sender));
-                    else sender.sendMessage(SimpleCivilisations.color + "You are not a member of a civilisation.");
-                } else {
-                    sender.sendMessage(ChatColor.GRAY + "Console must provide full usage: " + getUsage());
-                }
-                return;
+        if (args.length == 0) {
+            if (sender instanceof Player player) {
+                Civilisation civilisation = plugin.civilisations.get(plugin.users.get(player.getUniqueId()).getCivilisationId());
+                if (civilisation != null) sender.sendMessage(civilisationInfo(civilisation, sender));
+                else sender.sendMessage(SimpleCivilisations.color + "You are not a member of a civilisation.");
+            } else {
+                sender.sendMessage(ChatColor.GRAY + "Console must provide full usage: " + getUsage());
             }
+            return;
+        }
 
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             @SuppressWarnings("deprecation") OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
-
             Civilisation civilisation = player.hasPlayedBefore() ? SQL.getCivilisationFromPlayerUUID(player.getUniqueId()) : SQL.getCivilisation(args[0]);
             if (civilisation == null) {
                 sender.sendMessage(SimpleCivilisations.color + "No civilisation found.");
                 return;
             }
-
             sender.sendMessage(civilisationInfo(civilisation, sender));
         });
     }
@@ -67,19 +65,21 @@ public class InfoCommand extends SubCommand {
 
     private String civilisationInfo(Civilisation civilisation, CommandSender sender) {
         // I am reassigning a local variable.
-        @SuppressWarnings("ReassignedVariable") int online = 0;
+        int online = 0;
         ArrayList<String> members = new ArrayList<>();
         for (UUID member : civilisation.getMembers()) {
             if (Bukkit.getPlayer(member) != null) online += 1;
             if (!Objects.equals(member.toString(), civilisation.getLeader().toString())) members.add(formatPlayerName(member));
         }
 
+        boolean showPillarsAvailable = sender instanceof Player player && civilisation.getLeader().equals(player.getUniqueId());
         boolean showWaypoint = sender instanceof Player player && civilisation.hasMember((player.getUniqueId()));
 
         return (
                 ChatColor.GRAY + "-------------------------------\n"
                         + ChatColor.DARK_AQUA + civilisation.getName() + ChatColor.GRAY + " (" + online + "/" + civilisation.getMembers().size() + ")"
                         + "\n" + SimpleCivilisations.color + "Description: " + ChatColor.GRAY + civilisation.getDescription()
+                        + (showPillarsAvailable ? "\n" + SimpleCivilisations.color + "Pillars available: " + ChatColor.GRAY + civilisation.getPillarsAvailable() : "")
                         + (showWaypoint ? "\n" + SimpleCivilisations.color + "Waypoint: " + ChatColor.GRAY + (civilisation.getWaypoint() != null ? civilisation.getWaypoint().getBlockX() + " " + civilisation.getWaypoint().getBlockZ() : "None") : "")
                         + "\n" + SimpleCivilisations.color +  "Leader: " + formatPlayerName(civilisation.getLeader())
                         + (members.size() > 0 ? "\n" + SimpleCivilisations.color + "Members: " + String.join(ChatColor.GRAY + ", ", members) : "")

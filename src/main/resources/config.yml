@@ -1,0 +1,18 @@
+# SimpleCivilisations Configuration
+
+# MySQL
+# This plugin requires a MySQL database to run.
+host: localhost
+port: 3306
+database: test
+username: "root"
+password: ""
+
+# Spawning
+min-x: -1500
+max-x: 1500
+min-z: -1500
+max-z: 1500
+
+# Deathban (integer of minutes)
+deathban: 15

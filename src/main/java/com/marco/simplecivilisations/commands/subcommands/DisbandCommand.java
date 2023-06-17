@@ -34,23 +34,20 @@ public class DisbandCommand extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                User user = SQL.getUser(player.getUniqueId());
-                if (user == null) {
-                    player.sendMessage(ChatColor.RED + "Something went wrong!");
-                    return;
-                } else if (user.getCivilisationId() == null) {
-                    player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
-                    return;
-                } else if (user.getRole() < 3) {
-                    player.sendMessage(SimpleCivilisations.color + "Only the leader of your civilisation can run this command.");
-                    return;
-                }
+            User user = plugin.users.get(player.getUniqueId());
+            if (user.getCivilisationId() == null) {
+                player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
+                return;
+            } else if (user.getRole() < 3) {
+                player.sendMessage(SimpleCivilisations.color + "Only the leader of your civilisation can run this command.");
+                return;
+            }
 
-                Civilisation civilisation = SQL.getCivilisation(user);
-                civilisation.messageOnlineMembers(civilisation.getName() + " has been disbanded.");
-                civilisation.disband();
-            });
+            Civilisation civilisation = plugin.civilisations.get(user.getCivilisationId());
+            civilisation.messageOnlineMembers(civilisation.getName() + " has been disbanded.");
+            plugin.civilisations.remove(civilisation.getUniqueId());
+
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, civilisation::disband);
             return;
         }
         sender.sendMessage(ChatColor.RED + "Only player can run this command.");

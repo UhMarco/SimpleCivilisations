@@ -3,6 +3,7 @@ package com.marco.simplecivilisations.commands.subcommands;
 import com.marco.simplecivilisations.SimpleCivilisations;
 import com.marco.simplecivilisations.commands.SubCommand;
 import com.marco.simplecivilisations.sql.Civilisation;
+import com.marco.simplecivilisations.sql.User;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -33,23 +34,24 @@ public class DescriptionCommand extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
+            User user = plugin.users.get(player.getUniqueId());
+            Civilisation civilisation = plugin.civilisations.get(user.getCivilisationId());
+
+            if (civilisation == null) {
+                player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
+                return;
+            } else if (!civilisation.getLeader().toString().equals(player.getUniqueId().toString())) {
+                player.sendMessage(SimpleCivilisations.color + "Only the leader may set the civilisation description.");
+                return;
+            } else if (args.length == 0) {
+                player.sendMessage(SimpleCivilisations.color + getUsage());
+                return;
+            } else if (String.join(" ", args).length() > 100) {
+                player.sendMessage(SimpleCivilisations.color + "Civilisation descriptions cannot exceed 100 characters.");
+                return;
+            }
+
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                Civilisation civilisation = SQL.getCivilisationFromPlayerUUID(player.getUniqueId());
-
-                if (civilisation == null) {
-                    player.sendMessage(SimpleCivilisations.color + "You must be in a civilisation to run this command.");
-                    return;
-                } else if (!civilisation.getLeader().toString().equals(player.getUniqueId().toString())) {
-                    player.sendMessage(SimpleCivilisations.color + "Only the leader may set the civilisation description.");
-                    return;
-                } else if (args.length == 0) {
-                    player.sendMessage(SimpleCivilisations.color + getUsage());
-                    return;
-                } else if (String.join(" ", args).length() > 100) {
-                    player.sendMessage(SimpleCivilisations.color + "Civilisation descriptions cannot exceed 100 characters.");
-                    return;
-                }
-
                 civilisation.setDescription(String.join(" ", args));
                 player.sendMessage(SimpleCivilisations.color + "Civilisation description updated.");
             });

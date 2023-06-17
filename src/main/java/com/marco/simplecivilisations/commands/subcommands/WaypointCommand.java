@@ -35,18 +35,19 @@ public class WaypointCommand extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                User user = SQL.getUser(player.getUniqueId());
-                Civilisation civilisation = SQL.getCivilisation(user);
-                if (civilisation == null) {
-                    player.sendMessage(SimpleCivilisations.color + "You are not a member of a civilisation.");
-                    return;
-                } else if (civilisation.getWaypoint() == null) {
-                    player.sendMessage(SimpleCivilisations.color + "Your civilisation does not have a waypoint set.");
-                    return;
-                }
+            User user = plugin.users.get(player.getUniqueId());
+            Civilisation civilisation = plugin.civilisations.get(user.getCivilisationId());
+            if (civilisation == null) {
+                player.sendMessage(SimpleCivilisations.color + "You are not a member of a civilisation.");
+                return;
+            } else if (civilisation.getWaypoint() == null) {
+                player.sendMessage(SimpleCivilisations.color + "Your civilisation does not have a waypoint set.");
+                return;
+            }
 
-                Location wp = civilisation.getWaypoint();
+            Location wp = civilisation.getWaypoint();
+
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 player.sendMessage(SimpleCivilisations.color + "Waypoint: " + ChatColor.GRAY + wp.getBlockX() + ", " + wp.getBlockY() + ", " + wp.getBlockZ() + SimpleCivilisations.color + ".");
             });
 

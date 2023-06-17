@@ -34,20 +34,17 @@ public class LeaveCommand extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                // Get user and civilisation
-                User user = SQL.getUser(player.getUniqueId());
-                Civilisation civilisation = SQL.getCivilisation(user);
-                // Is there any reason they can't leave?
-                if (civilisation == null) {
-                    player.sendMessage(SimpleCivilisations.color + "You are not a member of a civilisation.");
-                    return;
-                } else if (user.getRole() == 3) {
-                    player.sendMessage(SimpleCivilisations.color + "Leaders cannot leave their civilisations. You must promote another player or disband.");
-                    return;
-                }
+            User user = plugin.users.get(player.getUniqueId());
+            Civilisation civilisation = plugin.civilisations.get(user.getCivilisationId());
+            if (civilisation == null) {
+                player.sendMessage(SimpleCivilisations.color + "You are not a member of a civilisation.");
+                return;
+            } else if (user.getRole() == 3) {
+                player.sendMessage(SimpleCivilisations.color + "Leaders cannot leave their civilisations. You must promote another player or disband.");
+                return;
+            }
 
-                // Leave
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 civilisation.messageOnlineMembers(player.getName() + " has left the civilisation.");
                 civilisation.removeMember(user);
                 player.sendMessage(SimpleCivilisations.color + "You have left " + civilisation.getName() + ".");

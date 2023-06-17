@@ -38,16 +38,16 @@ public class JoinCommand extends SubCommand {
             if (args.length == 0) {
                 player.sendMessage(SimpleCivilisations.color + getUsage());
                 return;
+
+            }
+            User user = plugin.users.get(player.getUniqueId());
+
+            if (user.getCivilisationId() != null) {
+                player.sendMessage(SimpleCivilisations.color + "You are already a member of a civilisation.");
+                return;
             }
 
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                User user = SQL.getUser(player.getUniqueId());
-
-                if (user.getCivilisationId() != null) {
-                    player.sendMessage(SimpleCivilisations.color + "You are already a member of a civilisation.");
-                    return;
-                }
-
                 @SuppressWarnings("deprecation") OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
                 Civilisation civilisation = offlinePlayer.hasPlayedBefore() ? SQL.getCivilisationFromPlayerUUID(offlinePlayer.getUniqueId()) : SQL.getCivilisation(args[0]);
                 if (civilisation == null) {

@@ -23,6 +23,7 @@ repositories {
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT"
+    compileOnly files("/Users/marco/Documents/build/Spigot/Spigot-Server/target/spigot-1.19.4-R0.1-SNAPSHOT.jar")
     compileOnly "com.mojang:authlib:1.5.21"
 }
 
