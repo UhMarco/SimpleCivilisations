@@ -40,10 +40,11 @@ public class BlockBreakListener extends EventListener {
                             event.getPlayer().sendMessage(SimpleCivilisations.color + "Territory disabled!");
                             Bukkit.getOnlinePlayers().forEach(p -> {
                                 if (civilisation.hasMember(p.getUniqueId())) {
-                                    p.sendTitle("§cPillar disabled!", "§7One of your pillars has been disabled.", 1, 40, 1);
+                                    p.sendTitle(ChatColor.RED + "Pillar disabled!", ChatColor.GRAY + "One of your pillars has been disabled.", 1, 80, 1);
                                     p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_BREAK, 1, 1);
                                 }
                             });
+                            plugin.update(civilisation);
                         } else {
                             event.getPlayer().sendMessage(SimpleCivilisations.color + "You cannot build in " + ChatColor.YELLOW + civilisation.getName() + SimpleCivilisations.color + "'s territory.");
                             event.setCancelled(true);
@@ -56,6 +57,7 @@ public class BlockBreakListener extends EventListener {
                                 pillar.remove();
                                 civilisation.gainPillar();
                                 event.getPlayer().sendMessage(SimpleCivilisations.color + "Pillar removed.");
+                                plugin.update(civilisation);
                             } else {
                                 Timestamp timeWhenNotBanned = Timestamp.from(pillar.getDestroyed().toInstant().plusSeconds(TimeUnit.MINUTES.toSeconds(60)));
                                 String remaining = SeenCommand.getTimestampDifference(Timestamp.from(Instant.now()), timeWhenNotBanned);

@@ -5,6 +5,7 @@ import com.marco.simplecivilisations.sql.Civilisation;
 import com.marco.simplecivilisations.sql.Pillar;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -42,14 +43,14 @@ public class PlayerMoveListener extends EventListener {
                 return;
             } else {
                 Civilisation civilisation = plugin.civilisations.get(to.getCivilisationId());
-                event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§6Entering §e" + civilisation.getName() + "§6's territory."));
+                event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.GOLD + "Entering " + ChatColor.YELLOW + civilisation.getName() + ChatColor.GOLD + "'s territory."));
             }
         } else if (to == null) {
             Civilisation civilisation = plugin.civilisations.get(from.getCivilisationId());
-            event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§6Leaving §e" + civilisation.getName() + "§6's territory."));
+            event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.GOLD + "Leaving " + ChatColor.YELLOW + civilisation.getName() + ChatColor.GOLD + "'s territory."));
         } else if (from == null) {
             Civilisation civilisation = plugin.civilisations.get(to.getCivilisationId());
-            event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§6Entering §e" + civilisation.getName() + "§6's territory."));
+            event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.GOLD + "Entering " + ChatColor.YELLOW + civilisation.getName() + ChatColor.GOLD + "'s territory."));
         }
     }
 }

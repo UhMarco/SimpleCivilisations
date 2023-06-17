@@ -219,4 +219,12 @@ public final class SimpleCivilisations extends JavaPlugin {
 
         return x > ax && x < bx && z > az && z < bz;
     }
+
+    public void update(User user) {
+        users.put(user.getUniqueId(), user);
+    }
+
+    public void update(Civilisation civilisation) {
+        civilisations.put(civilisation.getUniqueId(), civilisation);
+    }
 }

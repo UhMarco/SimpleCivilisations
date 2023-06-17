@@ -56,6 +56,7 @@ public class RenameCommand extends SubCommand {
 
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 civilisation.setName(args[0]);
+                plugin.update(civilisation);
                 player.sendMessage(SimpleCivilisations.color + "Civilisation name updated.");
             });
 

@@ -5,10 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -127,20 +125,22 @@ public class Civilisation {
         }
     }
 
-    public void  removeMember(User member) {
-        try {
-            if (!members.contains(member.getUniqueId()) || member.getUniqueId() == leader) return;
-            PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation = ?, role = ? WHERE uuid = ?");
-            ps.setString(1, null);
-            ps.setInt(2, 0);
-            ps.setString(3, member.toString());
-            ps.executeUpdate();
-            uninvite(member);
-            members.remove(member.getUniqueId());
-            member.setCivilisation(null);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void removeMember(User member) {
+        member.setCivilisation(null);
+        members.remove(member.getUniqueId());
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                if (!members.contains(member.getUniqueId()) || member.getUniqueId() == leader) return;
+                PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation = ?, role = ? WHERE uuid = ?");
+                ps.setString(1, null);
+                ps.setInt(2, 0);
+                ps.setString(3, member.toString());
+                ps.executeUpdate();
+                uninvite(member);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public boolean isOpen() {
@@ -266,10 +266,10 @@ public class Civilisation {
 
     public void addPillar(Location location) {
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO pillars (civilisation, location, active) VALUES (?, ?, ?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO pillars (civilisation, location, destroyed) VALUES (?, ?, ?)");
             ps.setString(1, uuid.toString());
             ps.setString(2, MySQL.serialiseLocation(location));
-            ps.setBoolean(3, true);
+            ps.setTimestamp(3, null);
             ps.executeUpdate();
             pillars.add(new Pillar(
                     plugin,

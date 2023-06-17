@@ -62,6 +62,8 @@ public class JoinCommand extends SubCommand {
 
                 civilisation.messageOnlineMembers(player.getName() + " has joined the civilisation.");
                 civilisation.addMember(user);
+                plugin.update(civilisation);
+                plugin.update(user);
                 player.sendMessage(SimpleCivilisations.color + "You have joined " + civilisation.getName() + ".");
             });
 

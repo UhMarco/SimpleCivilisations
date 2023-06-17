@@ -68,6 +68,10 @@ public class SetleaderCommand extends SubCommand {
 
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 civilisation.setLeader(uuid);
+                user.setRole(0);
+                plugin.users.get(uuid).setRole(3);
+                plugin.update(user);
+                plugin.update(civilisation);
                 civilisation.messageOnlineMembers(targetName + " has been promoted to the leader of the civilisation.");
             });
 

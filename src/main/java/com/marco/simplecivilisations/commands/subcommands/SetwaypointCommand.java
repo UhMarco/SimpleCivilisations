@@ -55,6 +55,7 @@ public class SetwaypointCommand extends SubCommand {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 civilisation.setWaypoint(clear ? null : player.getLocation());
                 player.sendMessage(SimpleCivilisations.color + "Civilisation waypoint updated.");
+                plugin.update(civilisation);
             });
 
             return;

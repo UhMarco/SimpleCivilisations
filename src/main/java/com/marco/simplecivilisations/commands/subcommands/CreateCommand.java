@@ -53,6 +53,7 @@ public class CreateCommand extends SubCommand {
                 user.setCivilisationId(civilisation.getUniqueId());
                 user.setRole(3);
                 plugin.civilisations.put(civilisation.getUniqueId(), civilisation);
+                plugin.update(user);
             });
         } else {
             sender.sendMessage(ChatColor.RED + "Only players may run this command.");

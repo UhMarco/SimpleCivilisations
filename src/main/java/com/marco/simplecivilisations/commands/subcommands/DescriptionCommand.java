@@ -54,6 +54,7 @@ public class DescriptionCommand extends SubCommand {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 civilisation.setDescription(String.join(" ", args));
                 player.sendMessage(SimpleCivilisations.color + "Civilisation description updated.");
+                plugin.update(civilisation);
             });
 
             return;

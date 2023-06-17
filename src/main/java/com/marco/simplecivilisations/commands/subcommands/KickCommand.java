@@ -78,6 +78,8 @@ public class KickCommand extends SubCommand {
                 if (targetPlayer != null) {
                     targetPlayer.sendMessage(SimpleCivilisations.color + "You were kicked from the civilisation.");
                 }
+                plugin.update(target);
+                plugin.update(civilisation);
             });
             return;
         }

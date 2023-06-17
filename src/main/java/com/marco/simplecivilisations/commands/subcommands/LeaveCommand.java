@@ -45,9 +45,11 @@ public class LeaveCommand extends SubCommand {
             }
 
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                civilisation.messageOnlineMembers(player.getName() + " has left the civilisation.");
-                civilisation.removeMember(user);
                 player.sendMessage(SimpleCivilisations.color + "You have left " + civilisation.getName() + ".");
+                civilisation.removeMember(user);
+                civilisation.messageOnlineMembers(player.getName() + " has left the civilisation.");
+                plugin.update(user);
+                plugin.update(civilisation);
             });
 
             return;

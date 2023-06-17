@@ -129,9 +129,12 @@ public class PlacePillarCommand extends SubCommand {
             sensorData.setInverted(true);
             b3.setBlockData(sensorData, false);
 
-            civilisation.addPillar(new Location(world, x, y + 1, z));
-            civilisation.usePillar();
-            player.sendMessage(SimpleCivilisations.color + "Pillar placed.");
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                civilisation.addPillar(new Location(world, x, y + 1, z));
+                civilisation.usePillar();
+                player.sendMessage(SimpleCivilisations.color + "Pillar placed.");
+                plugin.update(civilisation);
+            });
             return;
         }
         sender.sendMessage(ChatColor.RED + "Only players may run this command.");

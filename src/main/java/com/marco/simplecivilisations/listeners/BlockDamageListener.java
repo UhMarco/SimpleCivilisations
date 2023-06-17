@@ -6,6 +6,7 @@ import com.marco.simplecivilisations.sql.Pillar;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -33,7 +34,7 @@ public class BlockDamageListener extends EventListener {
                     if (!civilisation.hasMember(player.getUniqueId())) {
                         if (event.getItemInHand().getType() != Material.DIAMOND_PICKAXE || event.getItemInHand().getEnchantments().size() != 0) {
                             event.setCancelled(true);
-                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§cYou can only break this block with an unenchanted diamond pickaxe."));
+                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.RED + "You can only break this block with an unenchanted diamond pickaxe."));
                             return;
                         }
 
@@ -44,16 +45,16 @@ public class BlockDamageListener extends EventListener {
                         if (online < require) {
                             event.setCancelled(true);
                             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 0.5f);
-                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§e" + civilisation.getName() + "§c does not have enough members online (" + online + "/" + require + ")."));
+                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.YELLOW + civilisation.getName() + ChatColor.RED + " does not have enough members online (" + online + "/" + require + ")."));
                             return;
                         }
 
                         player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
-                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§cYou are now contesting the territory of §e" + civilisation.getName() + "§c."));
+                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.RED + "You are now contesting the territory of " + ChatColor.YELLOW + civilisation.getName() + ChatColor.RED + "."));
                         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 20 * 90, 1));
                         Bukkit.getOnlinePlayers().forEach(p -> {
                             if (civilisation.hasMember(p.getUniqueId())) {
-                                p.sendTitle("§cPillar being contested!", "§7One of your pillars is being contested.", 1, 40, 1);
+                                p.sendTitle(ChatColor.RED + "Pillar being contested!", ChatColor.GRAY + "One of your pillars is being contested.", 1, 80, 1);
                                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
                             }
                         });

@@ -59,10 +59,13 @@ public class RemovePillarCommand extends SubCommand {
                     if (!pillar.isActive()) {
                         player.sendMessage(SimpleCivilisations.color + "This pillar cannot be removed via a command.");
                     } else {
-                        civilisation.getPillars().remove(pillar);
-                        pillar.remove();
-                        civilisation.gainPillar();
-                        player.sendMessage(SimpleCivilisations.color + "Pillar removed.");
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                            civilisation.getPillars().remove(pillar);
+                            pillar.remove();
+                            civilisation.gainPillar();
+                            player.sendMessage(SimpleCivilisations.color + "Pillar removed.");
+                            plugin.update(civilisation);
+                        });
                     }
                     break;
                 }
