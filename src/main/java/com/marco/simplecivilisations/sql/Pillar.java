@@ -56,22 +56,24 @@ public class Pillar {
     }
 
     public void remove() {
-        location.getBlock().setType(Material.AIR);
-        World world = location.getWorld();
-        assert world != null;
-        world.getBlockAt(location.getBlockX(), location.getBlockY() - 1, location.getBlockZ()).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX() + 1, location.getBlockY() - 1, location.getBlockZ()).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX() - 1, location.getBlockY() - 1, location.getBlockZ()).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX(), location.getBlockY() - 1, location.getBlockZ() + 1).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX(), location.getBlockY() - 1, location.getBlockZ() - 1).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX(), location.getBlockY() + 2, location.getBlockZ()).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX(), location.getBlockY() + 3, location.getBlockZ()).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX() + 1, location.getBlockY() + 3, location.getBlockZ()).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX() - 1, location.getBlockY() + 3, location.getBlockZ()).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX(), location.getBlockY() + 3, location.getBlockZ() + 1).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX(), location.getBlockY() + 3, location.getBlockZ() - 1).setType(Material.AIR);
-        world.getBlockAt(location.getBlockX(), location.getBlockY() + 4, location.getBlockZ()).setType(Material.AIR);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            location.getBlock().setType(Material.AIR);
+            World world = location.getWorld();
+            assert world != null;
+            world.getBlockAt(location.getBlockX(), location.getBlockY() - 1, location.getBlockZ()).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX() + 1, location.getBlockY() - 1, location.getBlockZ()).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX() - 1, location.getBlockY() - 1, location.getBlockZ()).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX(), location.getBlockY() - 1, location.getBlockZ() + 1).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX(), location.getBlockY() - 1, location.getBlockZ() - 1).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX(), location.getBlockY() + 2, location.getBlockZ()).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX(), location.getBlockY() + 3, location.getBlockZ()).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX() + 1, location.getBlockY() + 3, location.getBlockZ()).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX() - 1, location.getBlockY() + 3, location.getBlockZ()).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX(), location.getBlockY() + 3, location.getBlockZ() + 1).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX(), location.getBlockY() + 3, location.getBlockZ() - 1).setType(Material.AIR);
+            world.getBlockAt(location.getBlockX(), location.getBlockY() + 4, location.getBlockZ()).setType(Material.AIR);
+        });
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
            try {
                PreparedStatement ps = plugin.getSQL().getConnection().prepareStatement("DELETE FROM pillars WHERE civilisation=? AND location=?");
