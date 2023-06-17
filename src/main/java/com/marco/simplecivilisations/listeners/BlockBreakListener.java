@@ -26,7 +26,7 @@ public class BlockBreakListener extends EventListener {
                 if (SimpleCivilisations.inRangeOfPillar(location, pillar)) {
                     if (!civilisation.hasMember(event.getPlayer().getUniqueId()) && pillar.isActive()) {
                         if (event.getPlayer().hasPermission("simplecivilisations.bypassterritory") && event.getPlayer().getGameMode() == GameMode.CREATIVE && location.distance(pillar.getLocation()) >= 5) return;
-                        if (location.equals(pillar.getLocation())) {
+                        if (location.equals(pillar.getLocation()) && event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
                             // They have broken the important block.
                             event.setCancelled(true);
                             event.getBlock().setType(Material.RED_CONCRETE);
