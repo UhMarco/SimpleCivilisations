@@ -127,7 +127,7 @@ public class Civilisation {
         }
     }
 
-    public void removeMember(User member) {
+    public void  removeMember(User member) {
         try {
             if (!members.contains(member.getUniqueId()) || member.getUniqueId() == leader) return;
             PreparedStatement ps = connection.prepareStatement("UPDATE users SET civilisation = ?, role = ? WHERE uuid = ?");
@@ -198,6 +198,9 @@ public class Civilisation {
     }
 
     public void disband() {
+        members.forEach(u -> {
+            plugin.users.get(u).setCivilisation(null);
+        });
         try {
             PreparedStatement c = connection.prepareStatement("DELETE FROM civilisations WHERE uuid=?");
             c.setString(1, uuid.toString());

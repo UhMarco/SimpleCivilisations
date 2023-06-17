@@ -199,7 +199,7 @@ public final class SimpleCivilisations extends JavaPlugin {
     private boolean isValid(Block block) {
         if (block.isEmpty() || block.isLiquid()) return false;
         if (block.getType().toString().endsWith("LEAVES")) return false;
-        if (List.of(Material.CACTUS, Material.MAGMA_BLOCK, Material.SWEET_BERRY_BUSH, Material.POWDER_SNOW).contains(block.getType())) return false;
+        if (List.of(Material.CACTUS, Material.MAGMA_BLOCK, Material.SWEET_BERRY_BUSH, Material.POWDER_SNOW, Material.SNOW).contains(block.getType())) return false;
         return true;
     }
 

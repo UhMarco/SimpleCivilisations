@@ -3,6 +3,7 @@ package com.marco.simplecivilisations.commands.subcommands;
 import com.marco.simplecivilisations.SimpleCivilisations;
 import com.marco.simplecivilisations.commands.SubCommand;
 import com.marco.simplecivilisations.sql.Civilisation;
+import com.marco.simplecivilisations.sql.User;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -33,7 +34,8 @@ public class CreateCommand extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (plugin.users.get(player.getUniqueId()).getCivilisationId() != null) {
+            User user = plugin.users.get(player.getUniqueId());
+            if (user.getCivilisationId() != null) {
                 player.sendMessage(SimpleCivilisations.color + "You are already in a civilisation.");
                 return;
             } else if (args.length == 0) {
@@ -48,6 +50,8 @@ public class CreateCommand extends SubCommand {
             }
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 Civilisation civilisation = SQL.createCivilisation(args[0], player);
+                user.setCivilisationId(civilisation.getUniqueId());
+                user.setRole(3);
                 plugin.civilisations.put(civilisation.getUniqueId(), civilisation);
             });
         } else {

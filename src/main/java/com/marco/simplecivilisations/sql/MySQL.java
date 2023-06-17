@@ -109,7 +109,7 @@ public class MySQL {
                     uuid,
                     null,
                     0,
-                    player.getWorld().getSpawnLocation(),
+                    location,
                     Timestamp.from(Instant.now()),
                     player.getLocation(),
                     0,

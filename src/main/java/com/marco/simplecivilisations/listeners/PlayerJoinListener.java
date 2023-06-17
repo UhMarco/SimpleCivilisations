@@ -27,6 +27,7 @@ public class PlayerJoinListener extends EventListener {
         } else {
             Timestamp timeWhenNotBanned = Timestamp.from(user.getLastDeath().toInstant().plusSeconds(TimeUnit.MINUTES.toSeconds(minutes)));
             event.getPlayer().kickPlayer("You are deathbanned for another " + SeenCommand.getTimestampDifference(Timestamp.from(Instant.now()), timeWhenNotBanned) + ".");
+            event.setJoinMessage(null);
         }
     }
 }

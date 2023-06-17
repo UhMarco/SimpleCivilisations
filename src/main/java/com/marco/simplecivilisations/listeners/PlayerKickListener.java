@@ -12,6 +12,9 @@ public class PlayerKickListener extends EventListener {
 
     @EventHandler
     public void listen(PlayerKickEvent event) {
+        if (event.getReason().startsWith("You are deathbanned for another")) {
+            event.setLeaveMessage("");
+        }
         plugin.getSQL().updateSession(event.getPlayer());
     }
 }
