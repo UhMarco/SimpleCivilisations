@@ -3,6 +3,7 @@ package com.marco.simplecivilisations.commands.subcommands;
 import com.marco.simplecivilisations.SimpleCivilisations;
 import com.marco.simplecivilisations.commands.SubCommand;
 import com.marco.simplecivilisations.sql.Civilisation;
+import com.marco.simplecivilisations.sql.Pillar;
 import com.marco.simplecivilisations.sql.User;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -46,6 +47,7 @@ public class DisbandCommand extends SubCommand {
             Civilisation civilisation = plugin.civilisations.get(user.getCivilisationId());
             civilisation.messageOnlineMembers(civilisation.getName() + " has been disbanded.");
             plugin.civilisations.remove(civilisation.getUniqueId());
+            civilisation.getPillars().forEach(Pillar::remove);
 
             Bukkit.getScheduler().runTaskAsynchronously(plugin, civilisation::disband);
             return;
